@@ -3,8 +3,6 @@
  * @date 2026.09.08
  * @brief My functions to work with strings
  */
-#ifndef STRINGFUNCS_H
-#define STRINGFUNCS_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,14 +10,14 @@
 /**
  * @brief takes string as const and returns it's len
  * @param [in] str string to count amount of args.
- * @return len of string as size_t
+ * @return len of string as size_t. If ptr to NULL return 0
  */
 size_t my_strlen(const char *str);
 
 /**
  * @brief puts string to stdout and goes to new line.
  * @param [in] str string to put.
- * @return EOF in end of file or posetive number otherwise.
+ * @return EOF in end of file or posetive number otherwise. If ptr to NULL return 0
  */
 int my_puts(const char *str);
 
@@ -27,7 +25,7 @@ int my_puts(const char *str);
  * @brief copyes one strind to another.
  * @param [out] dest string to copy in.
  * @param [in] str string to copy.
- * @return pointr to dest.
+ * @return pointr to dest. If ptr to NULL return 0
  */
 char *my_strcpy(char *dest, const char *str);
 
@@ -35,7 +33,7 @@ char *my_strcpy(char *dest, const char *str);
  * @brief puts one string to end of another.
  * @param [out] dest string to put in.
  * @param [in] str string to be putted.
- * @return pointer to dest.
+ * @return pointer to dest. If ptr to NULL return 0
  */
 char *my_strcat(char *str, const char *ct);
 
@@ -43,7 +41,7 @@ char *my_strcat(char *str, const char *ct);
  * @brief compares strings. If same returns 0, if first bigger returns posetive number and negative otherwise.
  * @param [in] str1 frist string.
  * @param [in] str2 second string.
- * @return 0 if same, posetive if first is bigger and negative otherwise.
+ * @return 0 if same, posetive if first is bigger and negative otherwise. If ptr to NULL return 0
  */
 int my_strcmp(const char *str1, const char *str2);
 
@@ -52,7 +50,7 @@ int my_strcmp(const char *str1, const char *str2);
  * @param [out] dest string to copy in.
  * @param [in] str string to copy.
  * @param [in] n amount of symbols to copy.
- * @return pointer to dest
+ * @return pointer to dest. If ptr to NULL return 0
  */
 char *my_strncpy(char *dest, const char *str, size_t n);
 
@@ -61,7 +59,7 @@ char *my_strncpy(char *dest, const char *str, size_t n);
  * @param [out] dest string to put in.
  * @param [in] str string to be putted.
  * @param [in] n max symbols to be putted.
- * @return pointer to dest.
+ * @return pointer to dest. If ptr to NULL return 0
  */
 char *my_strncat(char *str, char *ct, size_t n);
 
@@ -70,14 +68,14 @@ char *my_strncat(char *str, char *ct, size_t n);
  * @param [in] str1 frist string.
  * @param [in] str2 second string.
  * @param [in] n max symbols to compare.
- * @return 0 if same, posetive if first is bigger and negative otherwise.
+ * @return 0 if same, posetive if first is bigger and negative otherwise. If ptr to NULL return 0
  */
 int my_strncmp(const char *str1, const char *str2, size_t n);
 
 /**
  * @brief copyes string to dynamic mamory and returns pointer to it.
  * @param [in] str string to copy.
- * @return pointer to first element of new string.
+ * @return pointer to first element of new string. If ptr to NULL return 0
  */
 char *my_strdup(const char *str);
 
@@ -85,7 +83,7 @@ char *my_strdup(const char *str);
  * @brief works as my_strdup but copyes only n(or less) symbols.
  * @param [in] str string to copy.
  * @param [in] n max amount of ells to copy.
- * @return pointer to first element of new string.
+ * @return pointer to first element of new string. If ptr to NULL return 0
  */
 char *my_strndup(const char *str, size_t n);
 
@@ -93,8 +91,6 @@ char *my_strndup(const char *str, size_t n);
  * @brief macros to find minimum ell.
  */
 #define min(a, b) ((a) > (b) ? (b) : (a))
-
-#endif
 
 size_t my_strlen(const char *str)
 {
@@ -108,6 +104,11 @@ size_t my_strlen(const char *str)
         len++;
     }
     return len;
+}
+
+int main()
+{
+    printf("%d", my_strcmp("abc", "abc "));
 }
 
 int my_puts(const char *str)
@@ -170,20 +171,12 @@ int my_strcmp(const char *str1, const char *str2)
         printf("SORRY, WRONG INPUT");
         return 0;
     }
-    int i = 0;
+    size_t i = 0;
 
-    for (i = 0; str1[i] != '\0'; i++) {
+    while(str1[i] != '\0' && str1[i] == str2[i]) 
+       i++; 
 
-        if (str2[i] == '\0') return 1;
-
-        if (str1[i] == str2[i]) continue;
-
-        else return str1[i] - str2[i];
-    }
-
-    if (str2[i] == '\0') return 0;
-
-    return -1;
+    return str1[i] - str2[i];
 }
 
 char *my_strncpy(char *dest, const char *str, size_t n)
@@ -233,21 +226,14 @@ int my_strncmp(const char *str1, const char *str2, size_t n)
     }
 
     size_t i = 0;
-    if (n == 0) return 0; // int this case all strings are same;
+    if (n == 0) return 0; // in this case all strings are same;
 
-    for (i = 0; str1[i] != '\0'; i++) {
-        if (i == n) return 0;
-
-        if (str2[i] == '\0') return 1;
-
-        if (str1[i] == str2[i]) continue;
-
-        else return str1[i] - str2[i];
-    }
-    if (str2[i] == '\0') return 0;
-    return -1;
+    while (i < n && str1[i] != '\0' && str1[i] == str2[i])
+        i++;
+    
+    return str1[i] - str2[i];
 }
-
+    
 char *my_strdup(const char *str)
 {
     if (str == NULL) {
