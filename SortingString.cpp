@@ -39,6 +39,12 @@ WORK_RES FSuperFastStupidBubblesort(char *text, size_t sLen, size_t sNum);
 #define FastStupidBubblesort(text, sLen, sNum) FFastStupidBubblesort((char *) text, sLen, sNum)
 #define SuperFastStupidBubblesort(text, sLen, sNum) FSuperFastStupidBubblesort((char *) text, sLen, sNum)
 
+#define SwapElls(buff, type) \
+    buff = *((type *) (indPtr + realLen)); \
+    *((type *) (indPtr + realLen)) = *((type *) (indPtr + sLen + realLen)); \
+    *((type *) (indPtr + sLen + realLen)) = buff; \
+    realLen += sizeof(buff); 
+
 int main()
 {
     char text[STRNUM][STRLEN] = {
@@ -128,6 +134,9 @@ WORK_RES FSuperFastStupidBubblesort(char *text, size_t sLen, size_t sNum)
     }
 
     unsigned long long buff = 0;
+    int buffInt = 0;
+    short buffShort = 0;
+    char buffChar = 0;
 
     for (size_t n = 0; n < sNum - 1; n++) {
         for (size_t ch = 0; ch < sNum - 1 - n; ch++) {
@@ -137,32 +146,21 @@ WORK_RES FSuperFastStupidBubblesort(char *text, size_t sLen, size_t sNum)
 
                 size_t realLen = 0;
                 // first stage - fill main part
-                while (realLen <= (int) sLen - sizeof(buff)) {
-                    buff = *((unsigned long long *) (indPtr + realLen));
-                    // change
-                    *((unsigned long long *) (indPtr + realLen)) = *((unsigned long long *) (indPtr + sLen + realLen));
-                    *((unsigned long long *) (indPtr + sLen + realLen)) = buff;
-                    realLen += sizeof(buff);
+                while (realLen + sizeof(buff) <= sLen) {
+                    SwapElls(buff, unsigned long long);       
                 }
 
                 // second stage - fill last part (max 7 bites)
                 if (sLen - realLen >= sizeof(int)) {
-                    int buffInt = *((int *) (indPtr + realLen));
-                    *((int *) (indPtr + realLen)) = *((int *) (indPtr + sLen + realLen));
-                    *((int *) (indPtr + sLen + realLen)) = buffInt;
-                    realLen += sizeof(int);
+                    SwapElls(buffInt, int);
                 }
+
                 if (sLen - realLen >= sizeof(short)) {
-                    short buffShort = *((short *) (indPtr + realLen));
-                    *((short *) (indPtr + realLen)) = *((short *) (indPtr + sLen + realLen));
-                    *((short *) (indPtr + sLen + realLen)) = buffShort;
-                    realLen += sizeof(short);
+                    SwapElls(buffShort, short);
                 }
+
                 if (sLen - realLen == sizeof(char)) {
-                    char buffChar = *((char *) (indPtr + realLen));
-                    *((char *) (indPtr + realLen)) = *((char *) (indPtr + sLen + realLen));
-                    *((char *) (indPtr + sLen + realLen)) = buffChar;
-                    realLen += sizeof(char);
+                    SwapElls(buffChar, char);
                 }
             }
         }
