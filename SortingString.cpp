@@ -2,7 +2,7 @@
 #include <string.h>
 #include "basic.h"
 
-const int STRNUM = 10;
+const int STRNUM = 12;
 const int STRLEN = 20;
 
 /**
@@ -25,13 +25,12 @@ WORK_RES FFastStupidBubblesort(char *text, size_t sLen, size_t sNum);
 
 /**
  * @brief sorts(bubble sort) array of strings with usage of unsigned long long technology.
- * 
+ *
  * Idea is: we read data as unsigned long long and write it in this type. when amount of left symbols is to small we go to int, short, char.
  *
  * @param [out] text pointer to text(array) with lines.
  * @param [in] sLen len of one line.
  * @param [in] sNum number of lines.
- * @details 
  * @return result of work in terms of WORK_RES.
  */
 WORK_RES FSuperFastStupidBubblesort(char *text, size_t sLen, size_t sNum);
@@ -51,7 +50,10 @@ int main()
         "hah",
         "z",
         "b",
-        "a"
+        "a",
+        "hi my name is stepa",
+        "hi my name is sophy",
+        "hi my name is nikit"
     };
 
     // SlowStupidBubblesort(text, STRLEN, STRNUM);
@@ -121,46 +123,50 @@ WORK_RES FSuperFastStupidBubblesort(char *text, size_t sLen, size_t sNum)
         printf("FSuperFastStupidBulsort felt: Text points to NULL");
         return WRIN;
     }
+    if (sLen == 0 || sNum <= 1) {
+        return OK;
+    }
 
     unsigned long long buff = 0;
 
     for (size_t n = 0; n < sNum - 1; n++) {
         for (size_t ch = 0; ch < sNum - 1 - n; ch++) {
 
-            size_t ind = ch * sLen;
-            if (strncmp(&text[ind], &text[ind + sLen], sLen) < 0) {
+            char *indPtr = text + ch * sLen; // pointing to the first element of needed line
+            if (strncmp(indPtr, (indPtr + sLen), sLen) < 0) {
 
-                size_t realLen = sLen;
+                size_t realLen = 0;
                 // first stage - fill main part
-                while (realLen >= sizeof(buff)) {
-                    buff = *((unsigned long long *) ((size_t) (text + ind) + sLen - realLen)); // int is optional(sizeof(char) = 1), as for me it is easier to understand
+                while (realLen <= (int) sLen - sizeof(buff)) {
+                    buff = *((unsigned long long *) (indPtr + realLen));
                     // change
-                    *((unsigned long long *) ((size_t) (text + ind) + sLen   - realLen)) = *((unsigned long long *) ((size_t) (text + ind) + sLen * 2 - realLen));
-                    *((unsigned long long *) ((size_t) (text + ind) + sLen * 2 - realLen)) = buff;
-                    realLen -= sizeof(buff);
+                    *((unsigned long long *) (indPtr + realLen)) = *((unsigned long long *) (indPtr + sLen + realLen));
+                    *((unsigned long long *) (indPtr + sLen + realLen)) = buff;
+                    realLen += sizeof(buff);
                 }
 
-                // second stage - fill last part( max 7 bites)
-                size_t steps = realLen - sizeof(buff) * 2;
-                if (realLen >= sizeof(int)) {
-                    buff << sizeof(int);
-                    buff += *((int *) ((size_t) (text + ind) + sLen - realLen));
-                    realLen -= sizeof(int);
+                // second stage - fill last part (max 7 bites)
+                if (sLen - realLen >= sizeof(int)) {
+                    int buffInt = *((int *) (indPtr + realLen));
+                    *((int *) (indPtr + realLen)) = *((int *) (indPtr + sLen + realLen));
+                    *((int *) (indPtr + sLen + realLen)) = buffInt;
+                    realLen += sizeof(int);
                 }
-                if (realLen >= sizeof(short)) {
-                    buff << sizeof(short);
-                    buff += *((short *) ((size_t) (text + ind) + sLen - realLen));
-                    realLen -= sizeof(short);
+                if (sLen - realLen >= sizeof(short)) {
+                    short buffShort = *((short *) (indPtr + realLen));
+                    *((short *) (indPtr + realLen)) = *((short *) (indPtr + sLen + realLen));
+                    *((short *) (indPtr + sLen + realLen)) = buffShort;
+                    realLen += sizeof(short);
                 }
-                if (realLen = sizeof(char)) {
-                    buff << sizeof(char);
-                    buff += *((char *) ((size_t) (text + ind) + sLen - realLen));
-                    realLen -= sizeof(char);
+                if (sLen - realLen == sizeof(char)) {
+                    char buffChar = *((char *) (indPtr + realLen));
+                    *((char *) (indPtr + realLen)) = *((char *) (indPtr + sLen + realLen));
+                    *((char *) (indPtr + sLen + realLen)) = buffChar;
+                    realLen += sizeof(char);
                 }
-                *((unsigned long long *) ((size_t) (text + ind) + sLen     + steps)) = *((unsigned long long *) ((size_t) (text + ind) + sLen * 2 + steps));
-                *((unsigned long long *) ((size_t) (text + ind) + sLen * 2 + steps)) = buff;
             }
         }
+        buff = 0;
     }
 
     return OK;
