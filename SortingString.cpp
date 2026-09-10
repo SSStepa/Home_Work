@@ -35,12 +35,23 @@ WORK_RES FFastStupidBubblesort(char *text, size_t sSize, size_t sNum);
  */
 WORK_RES FSuperFastStupidBubblesort(char *text, size_t sSize, size_t sNum);
 
+/**
+ * @brief sorts array of pointers to strings.
+ * @param [out] text pointer to text(array) with lines.
+ * @param [in] sNum amount of lines in text.
+ * @return result of work in terms of WORK_RES.
+ */
 WORK_RES FastCleverBubbleSort(const char *text[], size_t sNum);
 
 #define SlowStupidBubblesort(text, sSize, sNum) FSlowStupidBubblesort((char *) text, sSize, sNum)
 #define FastStupidBubblesort(text, sSize, sNum) FFastStupidBubblesort((char *) text, sSize, sNum)
 #define SuperFastStupidBubblesort(text, sSize, sNum) FSuperFastStupidBubblesort((char *) text, sSize, sNum)
 
+/**
+ * @brief define to optemise work of FSuperFastStupidBubblesort.
+ * 
+ * Takes buffer as portion of bites and changes them whith each other.
+ */
 #define SwapElls(buff, type) \
     buff = *((type *) (indPtr + realLen)); \
     *((type *) (indPtr + realLen)) = *((type *) (indPtr + sSize + realLen)); \
@@ -198,6 +209,6 @@ WORK_RES FastCleverBubbleSort(const char *text[], size_t sNum)
             }  
         }   
     }
-    
+
     return OK;
 }
