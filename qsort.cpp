@@ -52,14 +52,12 @@ WORK_RES my_qsort(void *arr, size_t arrLen, size_t size, int (* comp)(const void
                 LeftInd += size;
             }
 
-            ErrorPrint((int *) arr, arrLen, 0, (LeftInd - (size_t) arr)/size, (RightInd - (size_t) arr)/size, "LEFT\n"); 
             assert((size_t) arr <= LeftInd && LeftInd <(size_t) arr + arrLen * size);
 
             while (RightInd >(size_t) arr && (*comp)((void *) RightInd, (void *) BaseEl) > 0) {
                 RightInd -= size;
             }
 
-            ErrorPrint((int *) arr, arrLen, 0, (LeftInd - (size_t) arr)/size, (RightInd - (size_t) arr)/size, "RIGHT\n"); 
             if (LeftInd >= RightInd) break;
 
             if      (LeftInd == BaseEl)  BaseEl = RightInd;
