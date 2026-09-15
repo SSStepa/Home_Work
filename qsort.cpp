@@ -16,11 +16,12 @@ const int STRNUM = 12;
 const int STRLEN = 20;
 
 // TODO обернуть в функцию а не макрос
-#define MacroSwapElls(buff, type) \
-    buff = *((type *) (firstPtr + realLen)); \
-    *((type *) (firstPtr + realLen)) = *((type *) (secondPtr + realLen)); \
-    *((type *) (secondPtr + realLen)) = buff; \
-    realLen += sizeof(buff);
+#define MacroChangeMamory(buff, type, firstPl, secondPl) \
+    buff = *((type *) (firstPl)); \
+    *((type *) (firstPl)) = *((type *) (secondPl)); \
+    *((type *) (secondPl)) = buff; \
+    firstPl += sizeof(buff); \
+    secondPl += sizeof(buff);
 
 int CompInt(const void *firstPtr, const void *secondPtr)
 {
@@ -127,24 +128,25 @@ WORK_RES SwapElls(unsigned char *firstPtr, unsigned char *secondPtr, size_t elSi
     short buffShort = 0;
     char buffChar = 0;
 
-    size_t realLen = 0;
-    
     // first stage - fill main part
-    while (realLen + sizeof(buff) <= elSize) {
-        MacroSwapElls(buff, unsigned long long);       
+    while (elSize/sizeof(buff) > 0) {
+        MacroChangeMamory(buff, unsigned long long, firstPtr, secondPtr);       
+        elSize -= sizeof(buff);
     }
 
     // second stage - fill last part (max 7 bites)
-    if (elSize - realLen >= sizeof(int)) {
-        MacroSwapElls(buffInt, int);
+    if (elSize >= sizeof(int)) {
+        MacroChangeMamory(buffInt, int, firstPtr, secondPtr);
+        elSize -= sizeof(int);
     }
 
-    if (elSize - realLen >= sizeof(short)) {
-        MacroSwapElls(buffShort, short);
+    if (elSize >= sizeof(short)) {
+        MacroChangeMamory(buffShort, short, firstPtr, secondPtr);
+        elSize -= sizeof(short);
     }
 
-    if (elSize - realLen == sizeof(char)) {
-        MacroSwapElls(buffChar, char);
+    if (elSize == sizeof(char)) {
+        MacroChangeMamory(buffChar, char, firstPtr, secondPtr);
     }
 
     return OK;
