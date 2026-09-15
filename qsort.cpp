@@ -4,12 +4,14 @@
 #include <string.h>
 #include "basic.h"
 
-WORK_RES my_qsortInt(int *arr, size_t arrLen);
 WORK_RES my_qsort(void *arr, size_t arrLen, size_t size, int (* comp)(const void *, const void *));
-WORK_RES SwapElls(size_t firstPtr, size_t secondPtr, size_t size);
+WORK_RES SwapElls(unsigned char *firstPtr, unsigned char *secondPtr, size_t size);
+unsigned char *Partition(unsigned char *LeftInd,unsigned char *RightInd, size_t elSize, int (*comp)(const void *, const void *));
+
+WORK_RES my_qsortInt(int *arr, size_t arrLen);
 void ErrorPrint(int *arr, size_t arrLen, size_t MidleInd, size_t LeftInd, size_t RightInd, const char *Place);
 
-const int NUMLEN = 14;
+const int NUMLEN = 10;
 const int STRNUM = 12;
 const int STRLEN = 20;
 
@@ -34,7 +36,7 @@ int CompStr(const void *firstPtr, const void *secondPtr)
 
 int main()
 {
-    int Nums[NUMLEN] = {234, 10, 11, 100, 200, 5, 45, 50, 40, 49, 15, 60, 10, 70};
+    int Nums[NUMLEN] = {35, 10, 25, 23, 1, 15, 2, 1, 1, 1};
     const char text[STRNUM][STRLEN] = {
         "zaz",
         "zaa",
@@ -56,90 +58,97 @@ int main()
     for (int n = 0; n < NUMLEN; n++) {
         printf("%d ", Nums[n]);
     }
+
+    printf("\n");
+
     for (int i = 0; i < STRNUM; i++) {
         printf("%s\n", text[i]);
     }
 }
 
-WORK_RES my_qsort(void *arr, size_t arrLen, size_t size, int (* comp)(const void *, const void *))
+WORK_RES my_qsort(void *arr, size_t arrLen, size_t elSize, int (* comp)(const void *, const void *))
 {
     assert(arr != NULL);
+    assert(elSize > 0);
+    assert(comp != NULL);
     
     if (arrLen < 2) 
         return OK;
-
-    size_t LeftInd  = (size_t) arr;
-    size_t RightInd = (size_t) arr + (arrLen - 1) * size;
-    size_t BaseEl   = (size_t) arr + arrLen/2 * size;
-
-    while (LeftInd < RightInd) {
-        while (LeftInd < (size_t) arr + arrLen * size  && (*comp)((void *) LeftInd, (void *) BaseEl) < 0)
-            LeftInd += size;
-
-        assert((size_t) arr <= LeftInd && LeftInd <(size_t) arr + arrLen * size);
-
-        while (RightInd > (size_t) arr && (*comp)((void *) RightInd, (void *) BaseEl) > 0)
-            RightInd -= size;
-
-        if (LeftInd >= RightInd) break;
-
-        if      (LeftInd  == BaseEl) BaseEl = RightInd;
-        else if (RightInd == BaseEl) BaseEl = LeftInd;
-
-        assert((size_t) arr <= RightInd && RightInd <(size_t) arr + arrLen * size);
-
-        SwapElls(LeftInd, RightInd, size);
-
-        LeftInd += size;
-        if (RightInd > (size_t) arr)
-            RightInd -= size;
-        else break;
-
-        assert((size_t) arr <= LeftInd  && LeftInd  <= (size_t) arr + arrLen * size);
-        assert((size_t) arr <= RightInd && RightInd <= (size_t) arr + arrLen * size);
-    }
     
-    if (RightInd > 0)
-        my_qsort(arr, (LeftInd - (size_t) arr)/size, size, comp);
+    unsigned char *divider = Partition((unsigned char *) arr, (unsigned char *) arr + (arrLen - 1) * elSize, elSize, comp);
+    
+    if (divider > (unsigned char *) arr)
+        my_qsort(arr, (divider - (unsigned char *) arr)/elSize, elSize, comp);
 
-    if (LeftInd <(size_t) arr + arrLen*size) 
-        my_qsort((void *) LeftInd, arrLen - (LeftInd - (size_t) arr)/size, size, comp);
+    if (divider < (unsigned char *) arr + arrLen * elSize) 
+        my_qsort((void *) divider, arrLen - (divider - (unsigned char *) arr)/elSize, elSize, comp);
     
     return OK;
 
 }
 
-WORK_RES SwapElls(size_t firstPtr, size_t secondPtr, size_t size)
+
+
+unsigned char *Partition(unsigned char *LeftPtr, unsigned char *RightPtr, size_t elSize, int (*comp)(const void *, const void *))
 {
+    assert(LeftPtr != NULL);
+    assert(RightPtr != NULL);
+    assert(comp != NULL);
+    assert(elSize > 0);
+
+    unsigned char *BaseElPtr = LeftPtr + ((RightPtr - LeftPtr)/2/elSize) * elSize; // /elSize * elSize to have num of ells 
+
+    while (LeftPtr <= RightPtr) {
+        while (LeftPtr < RightPtr && (*comp)((void *) LeftPtr, (void *) BaseElPtr) < 0)
+            LeftPtr += elSize;
+
+        while (RightPtr > LeftPtr && (*comp)((void *) RightPtr, (void *) BaseElPtr) > 0)
+            RightPtr -= elSize;
+
+        if      (LeftPtr  == BaseElPtr) BaseElPtr = RightPtr;
+        else if (RightPtr == BaseElPtr) BaseElPtr = LeftPtr;
+
+        SwapElls(LeftPtr, RightPtr, elSize);
+
+        LeftPtr += elSize;
+        RightPtr -= elSize;
+    }
+    return LeftPtr;
+}
+
+WORK_RES SwapElls(unsigned char *firstPtr, unsigned char *secondPtr, size_t elSize)
+{
+    assert(firstPtr != NULL);
+    assert(secondPtr != NULL);
+    assert(elSize > 0);
+
     unsigned long long buff = 0;
     int buffInt = 0;
     short buffShort = 0;
     char buffChar = 0;
 
-
     size_t realLen = 0;
     
     // first stage - fill main part
-    while (realLen + sizeof(buff) <= size) {
+    while (realLen + sizeof(buff) <= elSize) {
         MacroSwapElls(buff, unsigned long long);       
     }
 
     // second stage - fill last part (max 7 bites)
-    if (size - realLen >= sizeof(int)) {
+    if (elSize - realLen >= sizeof(int)) {
         MacroSwapElls(buffInt, int);
     }
 
-    if (size - realLen >= sizeof(short)) {
+    if (elSize - realLen >= sizeof(short)) {
         MacroSwapElls(buffShort, short);
     }
 
-    if (size - realLen == sizeof(char)) {
+    if (elSize - realLen == sizeof(char)) {
         MacroSwapElls(buffChar, char);
     }
 
     return OK;
 }
-
 
 WORK_RES my_qsortInt(int *arr, size_t arrLen)
 {
@@ -199,8 +208,6 @@ WORK_RES my_qsortInt(int *arr, size_t arrLen)
     }
 }
 
-
-
 void ErrorPrint(int *arr, size_t arrLen, size_t MidleInd, size_t LeftInd, size_t RightInd, const char *Place)
 {
     printf("%s\n", Place);
@@ -232,4 +239,3 @@ void ErrorPrint(int *arr, size_t arrLen, size_t MidleInd, size_t LeftInd, size_t
 
     getchar();
 }
-
